@@ -2,17 +2,19 @@ import { logger } from "firebase-functions/v2";
 import { onRequest } from "firebase-functions/v2/https";
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
 
-import { initializeApp } from "firebase-admin/app";
+import { initializeApp, getApps } from "firebase-admin/app";
 import { Timestamp } from "firebase-admin/firestore";
 import { getMessaging } from "firebase-admin/messaging";
+
+if (!getApps().length) {
+  initializeApp();
+}
 
 const cors = require("cors")({ origin: true });
 const messaging = getMessaging();
 
-initializeApp();
-
 // Upon https request, fetch data from BCMA's API and format it
-exports.apiFetch = onRequest((request, response) => {
+exports.prayerTimesFetch = onRequest((request, response) => {
   // Parse date according to Vancouver (not server time)
   const date = new Date();
 
