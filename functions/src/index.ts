@@ -36,43 +36,43 @@ exports.prayerTimesFetch = onRequest((request, response) => {
 
       const data = [
         {
-          id: "Fajr",
+          id: "fajr",
           start: parseTime(json.fajr),
           iqamah: parseTime(json.fajrIqama ? json.fajrIqama : json.fajr),
           name: "Fajr - الفجر"
         },
         {
-          id: "Shurooq",
+          id: "shurooq",
           start: parseTime(json.sunrise),
           iqamah: parseTime(json.sunrise),
           name: "Shurooq - الشروق"
         },
         {
-          id: "Duhr",
+          id: "duhr",
           start: parseTime(json.duhr),
           iqamah: parseTime(json.duhrIqama),
           name: "Duhr - الظهر"
         },
         {
-          id: "Asr",
+          id: "asr",
           start: parseTime(json.asr),
           iqamah: parseTime(json.asrIqama),
           name: "Asr - العصر"
         },
         {
-          id: "Maghrib",
+          id: "maghrib",
           start: parseTime(json.maghreb),
           iqamah: parseTime(json.maghreb),
           name: "Maghrib - المغرب"
         },
         {
-          id: "Isha",
+          id: "isha",
           start: parseTime(json.isha),
           iqamah: parseTime(json.ishaIqama),
-          name: "Isha - العشاء"
+          name: "Isha - العشاء",
         },
         {
-          id: "Jumuah",
+          id: "jumuah",
           start: parseTime(json.firstJumma),
           iqamah: parseTime(json.firstJumma),
           name: "Jumuah - الجمعة"
@@ -97,17 +97,33 @@ exports.announcementAlert = onDocumentCreated("/announcements/{docId}", async (e
   }
 
   const data = snapshot.data();
+
+  // Set current server timeStamp to newly added announcement
+  await snapshot.ref.set({
+    timeStamp: Timestamp.now()
+  }, { merge: true });
+
+  // Dont continue to firebase messaging if no platform provided
+  if (!data.platforms) {
+    return;
+  }
+
+  // Dont continue to firebase messaging if platforms isn't an array
+  if (!Array.isArray(data.platforms)) {
+    return;
+  }
+
+  // Dont continue to firebase messaging if platform is not for mobile
+  if (!data.platforms.includes("mobile")) {
+    return;
+  }
+
   const payload = {
     notification: {
       title: `${data.title} - New Announcement`,
       body: data.description,
     }
   };
-
-  // Set current server timeStamp to newly added announcement
-  await snapshot.ref.set({
-    timeStamp: Timestamp.now()
-  }, { merge: true });
 
   try {
     await messaging.sendToTopic("announcements", payload);
