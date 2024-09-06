@@ -5,10 +5,13 @@ import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { initializeApp, getApps } from "firebase-admin/app";
 import { Timestamp } from "firebase-admin/firestore";
 import { getMessaging } from "firebase-admin/messaging";
+import { defineString } from "firebase-functions/params";
 
 if (!getApps().length) {
   initializeApp();
 }
+
+const apiLink = defineString("API_LINK");
 
 const cors = require("cors")({ origin: true });
 const messaging = getMessaging();
@@ -27,7 +30,7 @@ exports.prayerTimesFetch = onRequest((request, response) => {
   const formatter = new Intl.DateTimeFormat("gregory", { timeZone: "America/Vancouver" });
   const dateString = formatter.format(date);
 
-  const BCMAUrl = "https://org.thebcma.com/api/Prayertimes/GetPrayertimeByDate?dt=" + dateString + "&organizationId=7";
+  const BCMAUrl = `${apiLink}${dateString}`;
 
   cors(request, response, async () => {
     try {
