@@ -1,0 +1,10 @@
+/node_modules/
+.vscode/
+
+functions/node_modules/
+functions/admin-key.json
+
+*.cache
+*.log
+
+.DS_Store
