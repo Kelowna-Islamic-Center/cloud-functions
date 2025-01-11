@@ -12,6 +12,7 @@ if (!getApps().length) {
 }
 
 const apiLink = defineString("API_LINK");
+const islamicFinderApiLink = defineString("ISLAMIC_FINDER_API_LINK");
 
 const cors = require("cors")({ origin: true });
 const messaging = getMessaging();
@@ -20,6 +21,7 @@ const messaging = getMessaging();
 exports.prayerTimesFetch = onRequest((request, response) => {
   // Parse date according to Vancouver (not server time)
   const date = new Date();
+  const method = request.query.method;
 
   // Add another day to date if tomorrow is passed as in query
   if (request.query.day) {
@@ -29,13 +31,27 @@ exports.prayerTimesFetch = onRequest((request, response) => {
   }
   const formatter = new Intl.DateTimeFormat("gregory", { timeZone: "America/Vancouver" });
   const dateString = formatter.format(date);
+  let asrHanbaliTime: string;
 
-  const BCMAUrl = `${apiLink}${dateString}`;
+  const BCMAUrl = `${apiLink.value()}${dateString}`;
+  // Islamic finder URL for non-hanafi asr athan time
+  const islamicFinderURL = `${islamicFinderApiLink.value()}${dateString}`;
 
   cors(request, response, async () => {
     try {
       const res = await fetch(BCMAUrl, { method: "GET", cache: "no-store" });
       const json = await res.json();
+
+      // Get Asr athan times from IslamicFinder if Hanbali/Shafi/Maliki method is selected
+      if (method === "hanbali") {
+        const islamicFinderRes = await fetch(islamicFinderURL, { method: "GET", cache: "no-store" });
+        const hanbaliJson = await islamicFinderRes.json();
+        const hanbaliAsrTime = hanbaliJson.results.Asr;
+
+        asrHanbaliTime = new Date('1970-01-01T' + hanbaliAsrTime + 'Z').toLocaleTimeString('en-US',
+          { timeZone: 'PST', hour12: true, hour: '2-digit', minute: '2-digit' }
+        );
+      }
 
       const data = [
         {
@@ -58,7 +74,7 @@ exports.prayerTimesFetch = onRequest((request, response) => {
         },
         {
           id: "asr",
-          start: parseTime(json.asr),
+          start: (asrHanbaliTime) ? asrHanbaliTime : parseTime(json.asr),
           iqamah: parseTime(json.asrIqama),
           name: "Asr - العصر"
         },
