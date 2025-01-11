@@ -48,7 +48,7 @@ exports.prayerTimesFetch = onRequest((request, response) => {
         const hanbaliJson = await islamicFinderRes.json();
         const hanbaliAsrTime = hanbaliJson.results.Asr;
 
-        asrHanbaliTime = new Date("1970-01-01T" + hanbaliAsrTime + 'Z').toLocaleTimeString("en-US",
+        asrHanbaliTime = new Date("1970-01-01T" + hanbaliAsrTime + "Z").toLocaleTimeString("en-US",
           { timeZone: "PST", hour12: true, hour: "2-digit", minute: "2-digit" }
         );
       }
