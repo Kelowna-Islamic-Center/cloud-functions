@@ -1,10 +1,11 @@
 import { onRequest } from "firebase-functions/v2/https";
 import { defineString } from "firebase-functions/params";
+import * as cors from "cors";
 
 const apiLink = defineString("API_LINK");
 const islamicFinderApiLink = defineString("ISLAMIC_FINDER_API_LINK");
 
-const cors = require("cors")({ origin: true });
+const corsHandler = cors({ origin: true });
 
 const prayerTimesFetch = onRequest((request, response) => {
 
@@ -27,7 +28,7 @@ const prayerTimesFetch = onRequest((request, response) => {
 	// Islamic finder URL for non-hanafi asr athan time
 	const islamicFinderURL = `${islamicFinderApiLink.value()}${dateString}`;
 
-	cors(request, response, async () => {
+	corsHandler(request, response, async () => {
 		try {
 			const res = await fetch(BCMAUrl, { method: "GET", cache: "no-store" });
 			const json = await res.json();

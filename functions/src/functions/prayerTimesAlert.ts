@@ -26,7 +26,7 @@ type Payload = {
 
 let auth: any;
 
-export const prayerTimesAlertScheduler = onSchedule("every day 02:00", async (event) => {
+export const prayerTimesAlertScheduler = onSchedule("every day 02:00", async () => {
 
     const taskQueue = getFunctions().taskQueue("sendPrayerAlert");
     const sendPrayerAlertURL = await getFunctionUrl("sendPrayerAlert");
