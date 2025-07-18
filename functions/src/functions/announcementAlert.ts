@@ -4,9 +4,9 @@ import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { Timestamp } from "firebase-admin/firestore";
 import { getMessaging } from "firebase-admin/messaging";
 
-const messaging = getMessaging();
-
 const announcementAlert = onDocumentCreated("/announcements/{docId}", async (event) => {
+	const messaging = getMessaging();
+	
 	const snapshot = event.data;
 
 	if (!snapshot) {
@@ -37,6 +37,7 @@ const announcementAlert = onDocumentCreated("/announcements/{docId}", async (eve
 	}
 
 	const payload = {
+		topic: "announcements",
 		notification: {
 			title: `${data.title} - New Announcement`,
 			body: data.description,
@@ -44,7 +45,7 @@ const announcementAlert = onDocumentCreated("/announcements/{docId}", async (eve
 	};
 
 	try {
-		await messaging.sendToTopic("announcements", payload);
+		await messaging.send(payload);
 	} catch (error) {
 		logger.error("Failure sending notification", error);
 	}
