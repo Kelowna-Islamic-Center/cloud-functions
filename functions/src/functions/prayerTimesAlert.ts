@@ -6,7 +6,7 @@ import { parse, subMinutes } from 'date-fns';
 import { TZDate } from "@date-fns/tz";
 import { GoogleAuth } from "google-auth-library";
 import { onTaskDispatched } from "firebase-functions/tasks";
-import { getFirestore } from "firebase-admin/firestore";
+import { getMessaging } from "firebase-admin/messaging";
 import { onSchedule } from "firebase-functions/scheduler";
 
 type ApiResponsePrayerItem = {
@@ -54,6 +54,10 @@ export const prayerTimesAlertScheduler = onSchedule("every day 07:00", async () 
             if (prayer.id === "shurooq") return;
 
             const today = new TZDate(new Date(), 'America/Vancouver');
+
+            // Skip Jumuah on non-friday and skip Duhr on Friday
+            if (today.getDay() !== 5 && prayer.id === "jumuah") return;
+            if (today.getDay() === 5 && prayer.id === "duhr") return; 
 
             const parsedIqamah = parse(prayer.iqamah, 'hh:mm a', today);
             const parsedAthan = parse(prayer.start, 'hh:mm a', today);
@@ -113,13 +117,24 @@ export const sendPrayerAlert = onTaskDispatched(
         }
     },
     async (req) => {
+        const messaging = getMessaging();
+
         const payload = req.data.payload;
 
-        await getFirestore()
-            .collection("taskDump")
-            .add({ payload: JSON.stringify(payload) });
+        const notificationPayload = {
+            topic: payload.topic,
+            notification: {
+                title: payload.title,
+                body: payload.body,
+            }
+        };
 
-        logger.info("Successfully wrote to firestore");
+        try {
+            await messaging.send(notificationPayload);
+            logger.info("Notification sent successfully", notificationPayload);
+        } catch (error) {
+            logger.error("Failure sending notification", error);
+        }
     }
 );
 
