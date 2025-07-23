@@ -9,6 +9,8 @@ import { onTaskDispatched } from "firebase-functions/tasks";
 import { getMessaging } from "firebase-admin/messaging";
 import { onSchedule } from "firebase-functions/scheduler";
 
+import * as locales from '../locale.json';
+
 type ApiResponsePrayerItem = {
     id: string,
     iqamah: string,
@@ -18,9 +20,9 @@ type ApiResponsePrayerItem = {
 
 type Payload = {
     name: string,
+    type: "athan" | "iqamah",
+    minutes: number,
     topic: string,
-    title: string,
-    body: string,
     time: Date
 }
 
@@ -69,16 +71,13 @@ export const prayerTimesAlertScheduler = onSchedule("every day 07:00", async () 
             const centralIqamahDate: TZDate = pacificIqamahDate.withTimeZone('America/Chicago');
             const centralAthanDate: TZDate = pacificAthanDate.withTimeZone('America/Chicago');
 
-
-            const capitalizedId = prayer.id.charAt(0).toUpperCase() + prayer.id.slice(1).toLowerCase();
-
             // Iqamah Reminders
             iqamahReminderMinutes.forEach(value => {
                 payloads.push({
                     name: prayer.id,
+                    type: "iqamah",
                     topic: `iqamah${value}MinuteReminder`,
-                    title: `${capitalizedId} Iqamah is in ${value} minutes at the Kelowna Masjid`,
-                    body: `${capitalizedId} Iqamah is at ${prayer.iqamah} today in Kelowna.`,
+                    minutes: value,
                     time: subMinutes(centralIqamahDate, value)
                 });
             });
@@ -86,9 +85,9 @@ export const prayerTimesAlertScheduler = onSchedule("every day 07:00", async () 
             // Athan Reminder
             payloads.push({
                 name: prayer.id,
+                type: "athan",
                 topic: "athanReminder",
-                title: `It is time for ${capitalizedId} Athan in Kelowna`,
-                body: `${capitalizedId} is at ${prayer.start} today in Kelowna.`,
+                minutes: 0,
                 time: centralAthanDate
             });
         });
@@ -119,22 +118,30 @@ export const sendPrayerAlert = onTaskDispatched(
     async (req) => {
         const messaging = getMessaging();
 
-        const payload = req.data.payload;
+        const payload = req.data.payload as Payload;
 
-        const notificationPayload = {
-            topic: payload.topic,
-            notification: {
-                title: payload.title,
-                body: payload.body,
+        // Create a notification for every locale
+        locales.forEach(async (locale) => {
+
+            const titleTemplate = locale.translations[payload.type].title;
+            const bodyTemplate = locale.translations[payload.type].body;
+
+            // Replace value placeholders with actual values from the payload
+            const title = titleTemplate.replace("{id}", payload.name).replace("{value}", String(payload.minutes));
+            const body = bodyTemplate.replace("{id}", payload.name).replace("{value}", String(payload.minutes));
+
+            const notificationPayload = {
+                condition: `'${payload.topic}' in topics && 'lang-${locale.id}' in topics`,
+                notification: { title, body }
+            };
+
+            try {
+                await messaging.send(notificationPayload);
+                logger.info("Notification sent successfully", notificationPayload);
+            } catch (error) {
+                logger.error("Failure sending notification", error);
             }
-        };
-
-        try {
-            await messaging.send(notificationPayload);
-            logger.info("Notification sent successfully", notificationPayload);
-        } catch (error) {
-            logger.error("Failure sending notification", error);
-        }
+        });
     }
 );
 
