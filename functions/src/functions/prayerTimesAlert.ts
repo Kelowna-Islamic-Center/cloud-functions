@@ -19,7 +19,7 @@ type ApiResponsePrayerItem = {
 }
 
 type Payload = {
-    name: string,
+    id: "fajr" | "shurooq" | "duhr" | "asr" | "maghrib" | "isha",
     type: "athan" | "iqamah",
     minutes: number,
     topic: string,
@@ -74,7 +74,7 @@ export const prayerTimesAlertScheduler = onSchedule("every day 07:00", async () 
             // Iqamah Reminders
             iqamahReminderMinutes.forEach(value => {
                 payloads.push({
-                    name: prayer.id,
+                    id: prayer.id as any,
                     type: "iqamah",
                     topic: `iqamah${value}MinuteReminder`,
                     minutes: value,
@@ -84,7 +84,7 @@ export const prayerTimesAlertScheduler = onSchedule("every day 07:00", async () 
 
             // Athan Reminder
             payloads.push({
-                name: prayer.id,
+                id: prayer.id as any,
                 type: "athan",
                 topic: "athanReminder",
                 minutes: 0,
@@ -127,8 +127,8 @@ export const sendPrayerAlert = onTaskDispatched(
             const bodyTemplate = locale.translations[payload.type].body;
 
             // Replace value placeholders with actual values from the payload
-            const title = titleTemplate.replace("{id}", payload.name).replace("{value}", String(payload.minutes));
-            const body = bodyTemplate.replace("{id}", payload.name).replace("{value}", String(payload.minutes));
+            const title = titleTemplate.replace("{id}", locale.translations[payload.id]).replace("{value}", String(payload.minutes));
+            const body = bodyTemplate.replace("{id}", locale.translations[payload.id]).replace("{value}", String(payload.minutes));
 
             const notificationPayload = {
                 condition: `'${payload.topic}' in topics && 'lang-${locale.id}' in topics`,
