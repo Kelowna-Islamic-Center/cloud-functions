@@ -41,6 +41,10 @@ const announcementAlert = onDocumentCreated("/announcements/{docId}", async (eve
 		notification: {
 			title: `${data.title} - New Announcement`,
 			body: data.description,
+		},
+		data: {
+			notificationType: "announcements",
+			topic: "announcements"
 		}
 	};
 

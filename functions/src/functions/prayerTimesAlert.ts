@@ -6,7 +6,7 @@ import { parse, subMinutes } from 'date-fns';
 import { TZDate } from "@date-fns/tz";
 import { GoogleAuth } from "google-auth-library";
 import { onTaskDispatched } from "firebase-functions/tasks";
-import { getMessaging } from "firebase-admin/messaging";
+import { getMessaging, Message } from "firebase-admin/messaging";
 import { onSchedule } from "firebase-functions/scheduler";
 
 import * as locales from '../locale.json';
@@ -130,9 +130,13 @@ export const sendPrayerAlert = onTaskDispatched(
             const title = titleTemplate.replace("{id}", locale.translations[payload.id]).replace("{value}", String(payload.minutes));
             const body = bodyTemplate.replace("{id}", locale.translations[payload.id]).replace("{value}", String(payload.minutes));
 
-            const notificationPayload = {
+            const notificationPayload: Message = {
                 condition: `'${payload.topic}' in topics && 'lang-${locale.id}' in topics`,
-                notification: { title, body }
+                notification: { title, body },
+                data: {
+                    notificationType: payload.type,
+                    topic: payload.topic
+                }
             };
 
             try {
