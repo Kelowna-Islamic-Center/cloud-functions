@@ -8,6 +8,7 @@
             "asr": "Asr",
             "maghrib": "Maghrib",
             "isha": "Isha",
+            "jumuah": "Jumuah",
             "iqamah": {
                 "title": "{id} Iqamah is in {value} minutes at the Kelowna Masjid",
                 "body": "{id} Iqamah is at {value} today in Kelowna."

@@ -3,6 +3,9 @@ import { onDocumentCreated } from "firebase-functions/v2/firestore";
 
 import { Timestamp } from "firebase-admin/firestore";
 import { getMessaging } from "firebase-admin/messaging";
+import { defineString } from "firebase-functions/params";
+
+const announcementsAndroidChannelId = defineString("ANDROID_CHANNEL_ID_ANNOUNCEMENTS");
 
 const announcementAlert = onDocumentCreated("/announcements/{docId}", async (event) => {
 	const messaging = getMessaging();
@@ -41,6 +44,7 @@ const announcementAlert = onDocumentCreated("/announcements/{docId}", async (eve
 		notification: {
 			title: `${data.title} - New Announcement`,
 			body: data.description,
+			android_channel_id: announcementsAndroidChannelId.value()
 		},
 		data: {
 			notificationType: "announcements",

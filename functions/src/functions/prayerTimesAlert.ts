@@ -11,6 +11,9 @@ import { onSchedule } from "firebase-functions/scheduler";
 
 import * as locales from '../locale.json';
 
+const athanAlertsAndroidChannelId = defineString("ANDROID_CHANNEL_ID_ATHAN_ALERTS");
+const iqamahAlertsAndroidChannelId = defineString("ANDROID_CHANNEL_ID_IQAMAH_ALERTS");
+
 type ApiResponsePrayerItem = {
     id: string,
     iqamah: string,
@@ -21,6 +24,7 @@ type ApiResponsePrayerItem = {
 type Payload = {
     id: "fajr" | "shurooq" | "duhr" | "asr" | "maghrib" | "isha",
     type: "athan" | "iqamah",
+    androidChannel: string,
     minutes: number,
     topic: string,
     time: Date
@@ -76,6 +80,7 @@ export const prayerTimesAlertScheduler = onSchedule("every day 07:00", async () 
                 payloads.push({
                     id: prayer.id as any,
                     type: "iqamah",
+                    androidChannel: iqamahAlertsAndroidChannelId.value(),
                     topic: `iqamah${value}MinuteReminder`,
                     minutes: value,
                     time: subMinutes(centralIqamahDate, value)
@@ -86,6 +91,7 @@ export const prayerTimesAlertScheduler = onSchedule("every day 07:00", async () 
             payloads.push({
                 id: prayer.id as any,
                 type: "athan",
+                androidChannel: athanAlertsAndroidChannelId.value(),
                 topic: "athanReminder",
                 minutes: 0,
                 time: centralAthanDate
@@ -133,6 +139,11 @@ export const sendPrayerAlert = onTaskDispatched(
             const notificationPayload: Message = {
                 condition: `'${payload.topic}' in topics && 'lang-${locale.id}' in topics`,
                 notification: { title, body },
+                android: { 
+                    notification: {
+                        channelId: payload.androidChannel
+                    } 
+                }, 
                 data: {
                     notificationType: payload.type,
                     topic: payload.topic
