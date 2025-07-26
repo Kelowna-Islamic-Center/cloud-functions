@@ -137,7 +137,7 @@ export const sendPrayerAlert = onTaskDispatched(
             const body = bodyTemplate.replace("{id}", locale.translations[payload.id]).replace("{value}", String(payload.minutes));
 
             const notificationPayload: Message = {
-                condition: `'${payload.topic}' in topics && 'lang-${locale.id}' in topics`,
+                condition: `'${payload.topic}' in topics && 'lang-${locale.id}' in topics` + (payload.type === "iqamah" ? "&& 'iqamahAlert' in topics" : ""),
                 notification: { title, body },
                 android: { 
                     notification: {
