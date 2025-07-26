@@ -81,7 +81,7 @@ export const prayerTimesAlertScheduler = onSchedule("every day 07:00", async () 
                     id: prayer.id as any,
                     type: "iqamah",
                     androidChannel: iqamahAlertsAndroidChannelId.value(),
-                    topic: `iqamah${value}MinuteReminder`,
+                    topic: `iqamah${value}MinuteAlert`,
                     minutes: value,
                     time: subMinutes(centralIqamahDate, value)
                 });
@@ -92,7 +92,7 @@ export const prayerTimesAlertScheduler = onSchedule("every day 07:00", async () 
                 id: prayer.id as any,
                 type: "athan",
                 androidChannel: athanAlertsAndroidChannelId.value(),
-                topic: "athanReminder",
+                topic: "athanAlert",
                 minutes: 0,
                 time: centralAthanDate
             });
