@@ -137,14 +137,24 @@ export const sendPrayerAlert = onTaskDispatched(
             const title = titleTemplate.replace("{id}", locale.translations[payload.id]).replace("{value}", String(payload.minutes));
             const body = bodyTemplate.replace("{id}", locale.translations[payload.id]).replace("{time}", timeString);
 
+            const isAthan = payload.type === "athan";
+
             const notificationPayload: Message = {
                 condition: `'${payload.topic}' in topics && 'lang-${locale.id}' in topics` + (payload.type === "iqamah" ? "&& 'iqamahAlert' in topics" : ""),
                 notification: { title, body },
                 android: { 
                     notification: {
-                        channelId: payload.androidChannel
+                        channelId: payload.androidChannel,
+                        sound: (isAthan) ? "athan_full" : undefined
                     } 
-                }, 
+                },
+                apns: {
+                    payload: {
+                        aps: {
+                            sound: (isAthan) ? "athan_short.caf" : undefined
+                        }
+                    }
+                },
                 data: {
                     notificationType: payload.type,
                     topic: payload.topic
