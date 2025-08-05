@@ -11,11 +11,11 @@
             "jumuah": "Jumuah",
             "iqamah": {
                 "title": "{id} Iqamah is in {value} minutes at the Kelowna Masjid",
-                "body": "{id} Iqamah is at {value} today in Kelowna."
+                "body": "{id} Iqamah is at {time} today in Kelowna."
             },
             "athan": {
                 "title": "It is time for {id} Athan in Kelowna",
-                "body": "{id} is at {value} today in Kelowna."
+                "body": "{id} is at {time} today in Kelowna."
             }
         }
     },
@@ -31,11 +31,11 @@
             "jumuah": "الجمعة",
             "iqamah": {
                 "title": "{id} الإقامة ستكون بعد {value} دقيقة في مسجد كيلونا",
-                "body": "{id} وقت الإقامة اليوم في كيلونا هو {value}"
+                "body": "{id} وقت الإقامة اليوم في كيلونا هو {time}"
             },
             "athan": {
                 "title": "حان وقت أذان {id} في كيلونا",
-                "body": "{id} سيكون عند الساعة {value} اليوم في كيلونا"
+                "body": "{id} سيكون عند الساعة {time} اليوم في كيلونا"
             }
         }
     }

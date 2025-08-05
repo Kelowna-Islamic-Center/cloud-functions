@@ -2,7 +2,7 @@ import { defineString } from "firebase-functions/params";
 import { logger } from "firebase-functions/v2";
 import { getFunctions } from "firebase-admin/functions";
 
-import { parse, subMinutes } from 'date-fns';
+import { format, parse, subMinutes } from 'date-fns';
 import { TZDate } from "@date-fns/tz";
 import { GoogleAuth } from "google-auth-library";
 import { onTaskDispatched } from "firebase-functions/tasks";
@@ -10,9 +10,6 @@ import { getMessaging, Message } from "firebase-admin/messaging";
 import { onSchedule } from "firebase-functions/scheduler";
 
 import * as locales from '../locale.json';
-
-const athanAlertsAndroidChannelId = defineString("ANDROID_CHANNEL_ID_ATHAN_ALERTS");
-const iqamahAlertsAndroidChannelId = defineString("ANDROID_CHANNEL_ID_IQAMAH_ALERTS");
 
 type ApiResponsePrayerItem = {
     id: string,
@@ -35,10 +32,12 @@ let auth: any;
 // Scheduled at 12:00 AM PST which is 7:00 AM UTC
 export const prayerTimesAlertScheduler = onSchedule("every day 07:00", async () => {
 
+    const athanAlertsAndroidChannelId = defineString("ANDROID_CHANNEL_ID_ATHAN_ALERTS");
+    const iqamahAlertsAndroidChannelId = defineString("ANDROID_CHANNEL_ID_IQAMAH_ALERTS");
+    const prayerTimesURL = defineString("PRAYER_TIMES_FETCH_URL");
+
     const taskQueue = getFunctions().taskQueue("sendPrayerAlert");
     const sendPrayerAlertURL = await getFunctionUrl("sendPrayerAlert");
-
-    const prayerTimesURL = defineString("PRAYER_TIMES_FETCH_URL");
 
     const iqamahReminderMinutes = [5, 10, 15, 20, 30, 45];
 
@@ -132,9 +131,11 @@ export const sendPrayerAlert = onTaskDispatched(
             const titleTemplate = locale.translations[payload.type].title;
             const bodyTemplate = locale.translations[payload.type].body;
 
+            const timeString = format(payload.time, "h:mm a");
+
             // Replace value placeholders with actual values from the payload
             const title = titleTemplate.replace("{id}", locale.translations[payload.id]).replace("{value}", String(payload.minutes));
-            const body = bodyTemplate.replace("{id}", locale.translations[payload.id]).replace("{value}", String(payload.minutes));
+            const body = bodyTemplate.replace("{id}", locale.translations[payload.id]).replace("{time}", timeString);
 
             const notificationPayload: Message = {
                 condition: `'${payload.topic}' in topics && 'lang-${locale.id}' in topics` + (payload.type === "iqamah" ? "&& 'iqamahAlert' in topics" : ""),
@@ -152,7 +153,7 @@ export const sendPrayerAlert = onTaskDispatched(
 
             try {
                 await messaging.send(notificationPayload);
-                logger.info("Notification sent successfully", notificationPayload);
+                // logger.info("Notification sent successfully", notificationPayload);
             } catch (error) {
                 logger.error("Failure sending notification", error);
             }
