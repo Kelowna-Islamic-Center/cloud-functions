@@ -147,8 +147,7 @@ export const sendPrayerAlert = onTaskDispatched(
                 notification: { title, body },
                 android: { 
                     notification: {
-                        channelId: payload.androidChannel,
-                        sound: (isAthan) ? "athan_full" : undefined
+                        channelId: payload.androidChannel
                     } 
                 },
                 apns: {
@@ -160,7 +159,8 @@ export const sendPrayerAlert = onTaskDispatched(
                 },
                 data: {
                     notificationType: payload.type,
-                    topic: payload.topic
+                    topic: payload.topic,
+                    action: (isAthan) ? "play_athan" : "",
                 }
             };
 
