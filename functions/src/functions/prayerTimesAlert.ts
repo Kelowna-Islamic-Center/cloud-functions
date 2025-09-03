@@ -147,10 +147,14 @@ export const sendPrayerAlert = onTaskDispatched(
                 notification: { title, body },
                 android: { 
                     notification: {
-                        channelId: payload.androidChannel
+                        channelId: payload.androidChannel,
+                        priority: "high"
                     } 
                 },
                 apns: {
+                    headers: {
+                        "apns-priority": "5"
+                    },
                     payload: {
                         aps: {
                             sound: (isAthan) ? "athan_short.caf" : undefined
