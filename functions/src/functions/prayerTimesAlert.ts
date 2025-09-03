@@ -24,7 +24,8 @@ type Payload = {
     androidChannel: string,
     minutes: number,
     topic: string,
-    time: Date
+    pacificTime: Date,
+    centralTime: Date
 }
 
 let auth: any;
@@ -82,7 +83,8 @@ export const prayerTimesAlertScheduler = onSchedule("every day 07:00", async () 
                     androidChannel: iqamahAlertsAndroidChannelId.value(),
                     topic: `iqamah${value}MinuteAlert`,
                     minutes: value,
-                    time: subMinutes(centralIqamahDate, value)
+                    centralTime: subMinutes(centralIqamahDate, value),
+                    pacificTime: subMinutes(pacificIqamahDate, value)
                 });
             });
 
@@ -93,13 +95,14 @@ export const prayerTimesAlertScheduler = onSchedule("every day 07:00", async () 
                 androidChannel: athanAlertsAndroidChannelId.value(),
                 topic: "athanAlert",
                 minutes: 0,
-                time: centralAthanDate
+                centralTime: centralAthanDate,
+                pacificTime: pacificAthanDate
             });
         });
 
         for (const item of payloads) {
             taskQueue.enqueue({ payload: item }, {
-                scheduleTime: item.time,
+                scheduleTime: item.centralTime,
                 dispatchDeadlineSeconds: 60 * 5,
                 uri: sendPrayerAlertURL
             })
@@ -131,7 +134,7 @@ export const sendPrayerAlert = onTaskDispatched(
             const titleTemplate = locale.translations[payload.type].title;
             const bodyTemplate = locale.translations[payload.type].body;
 
-            const timeString = format(payload.time, "h:mm a");
+            const timeString = format(payload.pacificTime, "h:mm a");
 
             // Replace value placeholders with actual values from the payload
             const title = titleTemplate.replace("{id}", locale.translations[payload.id]).replace("{value}", String(payload.minutes));
