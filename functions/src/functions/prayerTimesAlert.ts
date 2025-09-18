@@ -144,8 +144,11 @@ export const sendPrayerAlert = onTaskDispatched(
 
             const notificationPayload: Message = {
                 condition: `'${payload.topic}' in topics && 'lang-${locale.id}' in topics` + (payload.type === "iqamah" ? "&& 'iqamahAlert' in topics" : ""),
-                notification: { title, body },
+                ...(isAthan ? {} : { 
+                    notification: { title, body } 
+                }),
                 android: { 
+                    priority: "high",
                     notification: {
                         channelId: payload.androidChannel,
                         priority: "high"
@@ -153,18 +156,24 @@ export const sendPrayerAlert = onTaskDispatched(
                 },
                 apns: {
                     headers: {
-                        "apns-priority": "5"
+                        "apns-priority": (isAthan) ? "10" : "5"
                     },
                     payload: {
                         aps: {
-                            sound: (isAthan) ? "athan_short.caf" : undefined
+                            ...(isAthan ? { 
+                                alert: { title, body },
+                                sound: "athan_short.caf",
+                                contentAvailable: true
+                            } : {})
                         }
                     }
                 },
                 data: {
+                    action: (isAthan) ? "play_athan" : "",
+                    ...(isAthan ? { title, body } : {}),
                     notificationType: payload.type,
                     topic: payload.topic,
-                    action: (isAthan) ? "play_athan" : "",
+                    priority: "high"
                 }
             };
 
