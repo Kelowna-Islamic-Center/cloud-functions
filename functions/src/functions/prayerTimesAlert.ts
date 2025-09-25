@@ -2,8 +2,9 @@ import { defineString } from "firebase-functions/params";
 import { logger } from "firebase-functions/v2";
 import { getFunctions } from "firebase-admin/functions";
 
-import { format, parse, subMinutes } from 'date-fns';
+import { parse, subMinutes } from 'date-fns';
 import { TZDate } from "@date-fns/tz";
+import { formatInTimeZone } from "date-fns-tz";
 import { GoogleAuth } from "google-auth-library";
 import { onTaskDispatched } from "firebase-functions/tasks";
 import { getMessaging, Message } from "firebase-admin/messaging";
@@ -24,8 +25,7 @@ type Payload = {
     androidChannel: string,
     minutes: number,
     topic: string,
-    pacificTime: Date,
-    centralTime: Date
+    time: Date
 }
 
 let auth: any;
@@ -83,8 +83,7 @@ export const prayerTimesAlertScheduler = onSchedule("every day 07:00", async () 
                     androidChannel: iqamahAlertsAndroidChannelId.value(),
                     topic: `iqamah${value}MinuteAlert`,
                     minutes: value,
-                    centralTime: subMinutes(centralIqamahDate, value),
-                    pacificTime: subMinutes(pacificIqamahDate, value)
+                    time: subMinutes(centralIqamahDate, value)
                 });
             });
 
@@ -95,17 +94,18 @@ export const prayerTimesAlertScheduler = onSchedule("every day 07:00", async () 
                 androidChannel: athanAlertsAndroidChannelId.value(),
                 topic: "athanAlert",
                 minutes: 0,
-                centralTime: centralAthanDate,
-                pacificTime: pacificAthanDate
+                time: centralAthanDate
             });
         });
 
         for (const item of payloads) {
             taskQueue.enqueue({ payload: item }, {
-                scheduleTime: item.centralTime,
+                scheduleTime: item.time,
                 dispatchDeadlineSeconds: 60 * 5,
                 uri: sendPrayerAlertURL
-            })
+            });
+
+            logger.debug({ message: "Enqueued prayer time alert", item });
         }
 
     } catch (error) {
@@ -134,7 +134,7 @@ export const sendPrayerAlert = onTaskDispatched(
             const titleTemplate = locale.translations[payload.type].title;
             const bodyTemplate = locale.translations[payload.type].body;
 
-            const timeString = format(payload.pacificTime, "h:mm a");
+            const timeString = formatInTimeZone(payload.time, "America/Vancouver", "h:mm a");
 
             // Replace value placeholders with actual values from the payload
             const title = titleTemplate.replace("{id}", locale.translations[payload.id]).replace("{value}", String(payload.minutes));
