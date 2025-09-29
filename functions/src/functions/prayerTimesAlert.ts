@@ -162,8 +162,7 @@ export const sendPrayerAlert = onTaskDispatched(
                         aps: {
                             ...(isAthan ? { 
                                 alert: { title, body },
-                                sound: "athan_short.caf",
-                                contentAvailable: true
+                                sound: "athan_short.caf"
                             } : {})
                         }
                     }
