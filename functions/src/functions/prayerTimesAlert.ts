@@ -26,6 +26,7 @@ type Payload = {
     minutes: number,
     topic: string,
     time: Date
+    pacificTime: Date
 }
 
 let auth: any;
@@ -83,7 +84,8 @@ export const prayerTimesAlertScheduler = onSchedule("every day 07:00", async () 
                     androidChannel: iqamahAlertsAndroidChannelId.value(),
                     topic: `iqamah${value}MinuteAlert`,
                     minutes: value,
-                    time: subMinutes(centralIqamahDate, value)
+                    time: subMinutes(centralIqamahDate, value),
+                    pacificTime: subMinutes(pacificIqamahDate, value)
                 });
             });
 
@@ -94,7 +96,8 @@ export const prayerTimesAlertScheduler = onSchedule("every day 07:00", async () 
                 androidChannel: athanAlertsAndroidChannelId.value(),
                 topic: "athanAlert",
                 minutes: 0,
-                time: centralAthanDate
+                time: centralAthanDate,
+                pacificTime: pacificAthanDate
             });
         });
 
@@ -134,7 +137,7 @@ export const sendPrayerAlert = onTaskDispatched(
             const titleTemplate = locale.translations[payload.type].title;
             const bodyTemplate = locale.translations[payload.type].body;
 
-            const timeString = formatInTimeZone(payload.time, "America/Vancouver", "h:mm a");
+            const timeString = formatInTimeZone(payload.pacificTime, "America/Vancouver", "h:mm a");
 
             // Replace value placeholders with actual values from the payload
             const title = titleTemplate.replace("{id}", locale.translations[payload.id]).replace("{value}", String(payload.minutes));
