@@ -149,10 +149,12 @@ export const sendPrayerAlert = onTaskDispatched(
                 }),
                 android: { 
                     priority: "high",
-                    notification: {
-                        channelId: payload.androidChannel,
-                        priority: "high"
-                    } 
+                    ...(isAthan ? {} : { 
+                        notification: {
+                            channelId: payload.androidChannel,
+                            priority: "high"
+                        } 
+                    })
                 },
                 apns: {
                     headers: {
