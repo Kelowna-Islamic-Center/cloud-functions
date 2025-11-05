@@ -32,7 +32,7 @@ type Payload = {
 let auth: any;
 
 // Scheduled at 12:00 AM PST which is 7:00 AM UTC
-export const prayerTimesAlertScheduler = onSchedule("every day 07:00", async () => {
+export const prayerTimesAlertScheduler = onSchedule("every day 08:00", async () => {
 
     const athanAlertsAndroidChannelId = defineString("ANDROID_CHANNEL_ID_ATHAN_ALERTS");
     const iqamahAlertsAndroidChannelId = defineString("ANDROID_CHANNEL_ID_IQAMAH_ALERTS");
