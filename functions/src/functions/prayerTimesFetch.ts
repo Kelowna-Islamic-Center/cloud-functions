@@ -3,7 +3,7 @@ import { defineString } from "firebase-functions/params";
 import * as cors from "cors";
 
 const apiLink = defineString("API_LINK");
-const islamicFinderApiLink = defineString("ISLAMIC_FINDER_API_LINK");
+const thirdPartyApiLink = defineString("THIRD_PARTY_API_LINK");
 
 const corsHandler = cors({ origin: true });
 
@@ -26,22 +26,30 @@ const prayerTimesFetch = onRequest((request, response) => {
 
 	const BCMAUrl = `${apiLink.value()}${dateString}`;
 	// Islamic finder URL for non-hanafi asr athan time
-	const islamicFinderURL = `${islamicFinderApiLink.value()}${dateString}`;
+	const thirdPartyApiUrl = thirdPartyApiLink.value().replace("{date}", dateString.replace(/\//g, "-"));
 
 	corsHandler(request, response, async () => {
 		try {
 			const res = await fetch(BCMAUrl, { method: "GET", cache: "no-store" });
 			const json = await res.json();
 
-			// Get Asr athan times from IslamicFinder if Hanbali/Shafi/Maliki method is selected
+			// Get Asr athan times from Third Party if Hanbali/Shafi/Maliki method is selected
 			if (method === "hanbali") {
-				const islamicFinderRes = await fetch(islamicFinderURL, { method: "GET", cache: "no-store" });
-				const hanbaliJson = await islamicFinderRes.json();
-				const hanbaliAsrTime = hanbaliJson.results.Asr;
+				console.log(thirdPartyApiUrl);
+				const thirdPartyRes = await fetch(thirdPartyApiUrl, { method: "GET", cache: "no-store" });
+				const hanbaliJson = await thirdPartyRes.json();
 
-				asrHanbaliTime = new Date("1970-01-01T" + hanbaliAsrTime + "Z").toLocaleTimeString("en-US",
-					{ timeZone: "PST", hour12: true, hour: "2-digit", minute: "2-digit" }
-				);
+				console.log(hanbaliJson);
+				const hanbaliAsrISOString = hanbaliJson.data.timings.Asr; // ISO 8601 string
+				// Remove offset and Z, treat as local
+				const localIso = hanbaliAsrISOString.replace(/([+-]\d{2}:\d{2}|Z)$/, "");
+
+				// hanbaliAsrTime is an 
+				asrHanbaliTime = new Date(localIso).toLocaleTimeString("en-US", {
+					hour12: true,
+					hour: "2-digit",
+					minute: "2-digit"
+				});
 			}
 
 			const data = [
