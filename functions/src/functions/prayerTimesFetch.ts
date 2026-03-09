@@ -24,9 +24,15 @@ const prayerTimesFetch = onRequest((request, response) => {
 	const dateString = formatter.format(date);
 	let asrHanbaliTime: string;
 
+	// Convert MM/DD/YYYY to DD-MM-YYYY for third-party API
+	const convertToddMMyyyy = (dateStr: string) => {
+		const [month, day, year] = dateStr.split("/");
+		return `${day}-${month}-${year}`;
+	};
+
 	const BCMAUrl = `${apiLink.value()}${dateString}`;
-	// Islamic finder URL for non-hanafi asr athan time
-	const thirdPartyApiUrl = thirdPartyApiLink.value().replace("{date}", dateString.replace(/\//g, "-"));
+	// Third party URL for non-hanafi asr athan time
+	const thirdPartyApiUrl = thirdPartyApiLink.value().replace("{date}", convertToddMMyyyy(dateString));
 
 	corsHandler(request, response, async () => {
 		try {
@@ -35,11 +41,10 @@ const prayerTimesFetch = onRequest((request, response) => {
 
 			// Get Asr athan times from Third Party if Hanbali/Shafi/Maliki method is selected
 			if (method === "hanbali") {
-				console.log(thirdPartyApiUrl);
+				console.log(thirdPartyApiUrl)
 				const thirdPartyRes = await fetch(thirdPartyApiUrl, { method: "GET", cache: "no-store" });
 				const hanbaliJson = await thirdPartyRes.json();
 
-				console.log(hanbaliJson);
 				const hanbaliAsrISOString = hanbaliJson.data.timings.Asr; // ISO 8601 string
 				// Remove offset and Z, treat as local
 				const localIso = hanbaliAsrISOString.replace(/([+-]\d{2}:\d{2}|Z)$/, "");
