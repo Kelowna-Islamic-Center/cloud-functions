@@ -41,7 +41,6 @@ const prayerTimesFetch = onRequest((request, response) => {
 
 			// Get Asr athan times from Third Party if Hanbali/Shafi/Maliki method is selected
 			if (method === "hanbali") {
-				console.log(thirdPartyApiUrl)
 				const thirdPartyRes = await fetch(thirdPartyApiUrl, { method: "GET", cache: "no-store" });
 				const hanbaliJson = await thirdPartyRes.json();
 
