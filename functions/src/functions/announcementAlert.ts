@@ -52,7 +52,11 @@ const announcementAlert = onDocumentCreated("/announcements/{docId}", async (eve
 			notification: {
 				title,
 				body,
-				android_channel_id: announcementsAndroidChannelId.value()
+			},
+			android: {
+				notification: {
+					channelId: announcementsAndroidChannelId.value(),
+				}
 			},
 			data: {
 				notificationType: "announcements",
