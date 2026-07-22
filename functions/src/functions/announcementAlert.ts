@@ -24,36 +24,47 @@ const announcementAlert = onDocumentCreated("/announcements/{docId}", async (eve
 		timeStamp: Timestamp.now()
 	}, { merge: true });
 
-	// Dont continue to firebase messaging if no platform provided
+	// Safety Checks
+
 	if (!data.platforms) {
 		return;
 	}
 
-	// Dont continue to firebase messaging if platforms isn't an array
 	if (!Array.isArray(data.platforms)) {
 		return;
 	}
 
-	// Dont continue to firebase messaging if platform is not for mobile
 	if (!data.platforms.includes("mobile")) {
 		return;
 	}
 
-	const payload = {
-		topic: "announcements",
-		notification: {
-			title: `${data.title} - New Announcement`,
-			body: data.description,
-			android_channel_id: announcementsAndroidChannelId.value()
-		},
-		data: {
-			notificationType: "announcements",
-			topic: "announcements"
-		}
-	};
+	// Look for all localized keys in the l10n object, if none are found, default to sending the notification in English
+	const localeKeys = Object.keys(data.l10n ?? {}).filter((value): value is string => typeof value === "string" && value.trim() !== "");
+	const localesToSend = localeKeys.length > 0 ? localeKeys : ["en"];
+	
+	const messages = localesToSend.map((locale) => {
+		const localizedValues = (data.l10n?.[locale] as Record<string, string> | undefined) ?? {};
+		const title = (localizedValues.title ?? data.title ?? "New Announcement").toString().trim();
+		const body = (localizedValues.description ?? data.description ?? "A new announcement is available.").toString().trim();
+
+		return {
+			condition: `'announcements' in topics && 'lang-${locale}' in topics`,
+			notification: {
+				title,
+				body,
+				android_channel_id: announcementsAndroidChannelId.value()
+			},
+			data: {
+				notificationType: "announcements",
+				topic: "announcements",
+				locale,
+				announcementId: event.params.docId
+			}
+		};
+	});
 
 	try {
-		await messaging.send(payload);
+		await messaging.sendEach(messages);
 	} catch (error) {
 		logger.error("Failure sending notification", error);
 	}
