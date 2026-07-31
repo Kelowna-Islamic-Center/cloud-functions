@@ -1,20 +1,19 @@
 # Kelowna Islamic Center Firebase Cloud Functions
 
-The **KIC Firebase Cloud Functions** repository powers the backend services of the ecosystem.  
-It provides serverless business logic for prayer time scheduling, announcements, and notification delivery.  
+These funciton power the backend firebase services of the KIC ecosystem.  
+All serverless business logic for announcements and announcement notification delivery is handled here.
 
-The full documentation for this repository can be found on the [**Official Documentation Website**](https://kelowna-islamic-center.github.io/documentation/server-side/).
+The full documentation for this repository can be found on the [Official Documentation Website](https://kelowna-islamic-center.github.io/documentation/server-side/).
 
 If access to the production Firebase project is required, it can be requested by submitting a request to the Masjid Board.
 
-[![Visit Live Site](https://img.shields.io/badge/Read%20the%20Full%20Documentation-4CAF50?style=for-the-badge)](https://kelowna-islamic-center.github.io/documentation/server-side/)
+The latest version of the mobile app and kiosk app both use two functions.
 
-## Features
+**announcementAlert (onDocumentCreated):** Schedules and dispatches new announcement notifications through FCM
 
-- 🔔 Schedules and dispatches athan & iqamah reminders through FCM
-- 📢 Stores and delivers announcements in real-time with Firestore
-- 🕌 Integrates with external APIs (e.g., prayer times API)
-- 🌍 Fully internationalized notifications
+**prayerTimesFetch (onRequest):** Prayer Times API that combines and provides clean usable prayer data from both BCMA and AlAdhan APIs.
+
+> **Note:** There are also currently three legacy cloud functions that are deployed within the production environment. These funcitons handle requests and provide services to previous versions of the mobile app. These legacy functions are no longer included within this repository.
 
 ## Prerequisites
 
@@ -29,9 +28,9 @@ Clone and install dependencies:
 git clone https://github.com/Kelowna-Islamic-Center/cloud-functions
 cd cloud-functions/functions
 npm install
-````
+```
 
-Emulate locally:
+Emulate locally for testing changes:
 
 ```bash
 firebase emulators:start
