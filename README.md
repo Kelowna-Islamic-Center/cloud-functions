@@ -1,6 +1,6 @@
 # Kelowna Islamic Center Firebase Cloud Functions
 
-These funciton power the backend firebase services of the KIC ecosystem.  
+These functions power the backend Firebase services of the KIC ecosystem.
 All serverless business logic for announcements and announcement notification delivery is handled here.
 
 The full documentation for this repository can be found on the [Official Documentation Website](https://kelowna-islamic-center.github.io/documentation/server-side/).
@@ -9,16 +9,16 @@ If access to the production Firebase project is required, it can be requested by
 
 The latest version of the mobile app and kiosk app both use two functions.
 
-**announcementAlert (onDocumentCreated):** Schedules and dispatches new announcement notifications through FCM
+**announcementAlert (onDocumentCreated):** Schedules and dispatches new announcement notifications through FCM.
 
-**prayerTimesFetch (onRequest):** Prayer Times API that combines and provides clean usable prayer data from both BCMA and AlAdhan APIs.
+**prayerTimesFetch (onRequest):** Prayer Times API that combines and provides clean, usable prayer data from both BCMA and AlAdhan APIs.
 
-> **Note:** There are also currently three legacy cloud functions that are deployed within the production environment. These funcitons handle requests and provide services to previous versions of the mobile app. These legacy functions are no longer included within this repository.
+> **Note:** There are also currently three legacy Cloud Functions that are deployed within the production environment. These functions handle requests and provide services to previous versions of the mobile app. These legacy functions are no longer included within this repository.
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org) (v18 or later)  
-- [Firebase CLI](https://firebase.google.com/docs/cli)
+* [Node.js](https://nodejs.org) (v18 or later)
+* [Firebase CLI](https://firebase.google.com/docs/cli)
 
 ## Getting Started
 
