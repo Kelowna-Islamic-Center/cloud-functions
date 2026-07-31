@@ -13,7 +13,7 @@ The latest version of the mobile app and kiosk app both use two functions.
 
 **prayerTimesFetch (onRequest):** Prayer Times API that combines and provides clean, usable prayer data from both BCMA and AlAdhan APIs.
 
-> **Note:** There are also currently three legacy Cloud Functions that are deployed within the production environment. These functions handle requests and provide services to previous versions of the mobile app. These legacy functions are no longer included within this repository.
+> **Note:** There are also currently 4 legacy Cloud Functions that are deployed within the production environment. These functions handle requests and provide services to previous versions of the mobile app. These legacy functions are no longer included within this repository.
 
 ## Prerequisites
 
