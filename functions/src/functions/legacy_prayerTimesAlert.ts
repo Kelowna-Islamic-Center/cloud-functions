@@ -1,3 +1,13 @@
+/** IMPORTANT: 
+ * 
+ * LEGACY FUNCTION: SHOULD NOT BE USED IN NEW IMPLEMENTATIONS
+ * 
+ * This is the legacy cloud functions way of receiving iqamaah and athan alerts.
+ * This implementation has been replaced with the native iOS and Android implementations of local notifications and background tasks.
+ * 
+ * This file is kept for archival purposes and should not be used in new deployments.
+ * */
+
 import { defineString } from "firebase-functions/params";
 import { logger } from "firebase-functions/v2";
 import { getFunctions } from "firebase-admin/functions";
